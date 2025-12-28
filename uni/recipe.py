@@ -50,7 +50,11 @@ class Recipe:
         return h.hexdigest()
 
     def _install_binary(self):
-        key = self._platform_key()
+        key: str = ""
+        if self.sources["universal"]:
+            key = "universal"
+        else:
+            key = self._platform_key()
 
         if key not in self.sources:
             raise RuntimeError(
@@ -69,8 +73,10 @@ class Recipe:
             archive = tmp / "archive.tar.gz"
             extract_dir = tmp / "extract"
 
+            print(f"downloading binary for {self.name}, version {self.version}")
             urlretrieve(url, archive)
 
+            print("validatin checksum")
             actual = self._sha256sum(archive)
             if actual != expected_hash:
                 raise RuntimeError(
@@ -79,6 +85,7 @@ class Recipe:
                 )
 
             extract_dir.mkdir()
+            print("extracting binary")
             with tarfile.open(archive, "r:gz") as tar:
                 tar.extractall(extract_dir)
 
@@ -98,6 +105,7 @@ class Recipe:
             if opt_dir.exists():
                 shutil.rmtree(opt_dir)
 
+            print("moving binary")
             shutil.move(str(extracted_root), opt_dir)
 
         # validate binary
@@ -116,4 +124,5 @@ class Recipe:
         if symlink_path.exists() or symlink_path.is_symlink():
             symlink_path.unlink()
 
+        print(f"creating symlink in {str(symlink_path)}")
         os.symlink(binary_path, symlink_path)
