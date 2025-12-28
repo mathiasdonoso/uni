@@ -62,7 +62,7 @@ class Recipe:
         expected_hash = source["sha256"]
 
         opt_dir = self.OPT_BASE / self.name
-        symlink_path = self.BIN_DIR / self.name
+        symlink_path = self.BIN_DIR / self.bin
 
         with tempfile.TemporaryDirectory(prefix="uni-") as tmp:
             tmp = Path(tmp)

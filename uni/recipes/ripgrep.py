@@ -5,7 +5,7 @@ class Ripgrep(Recipe):
     name = "ripgrep"
     description = "ripgrep recursively searches directories for a regex pattern while respecting your gitignore"
     version = "15.1.0"
-    bin = "bin/rg"
+    bin = "rg"
 
     sources = {
         "linux-x86_64": {
