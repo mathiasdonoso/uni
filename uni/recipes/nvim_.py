@@ -4,7 +4,7 @@ from uni.recipe import Recipe
 class Nvim(Recipe):
     name = "nvim"
     description = "Vim-fork focused on extensibility and usability"
-    version = "v0.11.5"
+    version = "0.11.5"
     bin = "bin/nvim"
 
     sources = {
@@ -17,3 +17,6 @@ class Nvim(Recipe):
             "sha256": "ea4f9a31b11cc1477ff014aebb7b207684e7280f94ffa97abdab6cacd9b98519",
         },
     }
+
+    def post_install(self):
+        pass
