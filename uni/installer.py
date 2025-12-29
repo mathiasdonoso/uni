@@ -1,8 +1,9 @@
-import platform
 import hashlib
+import os
+import platform
+import subprocess
 import tarfile
 import tempfile
-import subprocess
 from pathlib import Path
 from urllib.request import urlretrieve
 
@@ -30,7 +31,11 @@ class Installer:
                     if self._install_build_from_source(source):
                         print(f"Built and installed {formula.name} from source")
                         return True
-            
+                elif source.type == "package_manager":
+                    print(f"Preparing to install using the package manager")
+                    if self._install_package_manager(source):
+                        print(f"Installed {formula.name} from the package manager")
+                        return True
             except Exception as e:
                 print(f"Failed: {e}")
                 continue
@@ -58,7 +63,7 @@ class Installer:
         with tempfile.TemporaryDirectory(prefix="uni-") as tmpdir:
             tmpdir = Path(tmpdir)
     
-            print(f"Downloading from {url}...")
+            print(f"Downloading binary from {url}...")
             archive = tmpdir / "archive.tar.gz"
             urlretrieve(url, archive)
     
@@ -93,9 +98,6 @@ class Installer:
     def _install_package_manager(self, source):
         """Use system package manager"""
         distro = self._detect_distro()
-        print(f"distro: %s", distro)
-        return
-        
         packages = source.config.get("packages", {})
         
         if distro not in packages:
@@ -103,13 +105,19 @@ class Installer:
         
         package_name = packages[distro]
         
-        # Detect package manager and install
+        is_root = os.geteuid() == 0
         if distro in ["debian", "ubuntu"]:
-            cmd = ["sudo", "apt", "install", "-y", package_name]
+            cmd = ["apt", "install", "-y", package_name]
+            if not is_root:
+                cmd.insert(0, "sudo")
         elif distro == "arch":
-            cmd = ["sudo", "pacman", "-S", "--noconfirm", package_name]
+            cmd = ["pacman", "-S", "--noconfirm", package_name]
+            if not is_root:
+                cmd.insert(0, "sudo")
         elif distro in ["fedora", "rhel"]:
-            cmd = ["sudo", "dnf", "install", "-y", package_name]
+            cmd = ["dnf", "install", "-y", package_name]
+            if not is_root:
+                cmd.insert(0, "sudo")
         else:
             raise Exception(f"Unsupported distro: {distro}")
         
@@ -122,8 +130,44 @@ class Installer:
         return True
     
     def _install_build_from_source(self, source):
-        """Build from source - not implemented yet"""
-        raise Exception("Build from source not implemented in v1")
+        """Build from source"""
+        # download dependencies
+        for dep in source.config["build_deps"]:
+            # TODO
+            pass
+
+        url = source.config["url"]
+        expected_sha256 = source.config["sha256"]
+
+        # download source code and running commands
+        with tempfile.TemporaryDirectory(prefix="uni-") as tmpdir:
+            tmpdir = Path(tmpdir)
+    
+            print(f"Downloading source code from {url}...")
+            archive = tmpdir / "code.tar.gz"
+            urlretrieve(url, archive)
+    
+            if not self._verify_checksum(archive, expected_sha256):
+                raise Exception("Checksum verification failed")
+    
+            extract_dir = tmpdir / "extract"
+            extract_dir.mkdir()
+
+            with tarfile.open(archive, "r:gz") as tar:
+                tar.extractall(extract_dir)
+
+            extracted_root = next(
+                p for p in extract_dir.iterdir() if p.is_dir()
+            )
+
+            for cmd in source.config["build_steps"]:
+                result = subprocess.run(cmd, cwd=extracted_root, capture_output=True, text=True)
+
+                if result.returncode != 0:
+                    raise Exception(f"command {cmd} failed: {result.stderr}")
+
+        return True
+
     
     def _verify_checksum(self, filepath, expected_sha256):
         """Verify SHA256 checksum"""
