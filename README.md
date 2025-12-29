@@ -5,7 +5,7 @@ A personal cli tool to install packages across different linux distributions
 ## Warning :warning:
 This project is a work in progress (WIP).
 
-This project exists to support my personal workflows and learning goals. Design decisions, features, and defaults are intentionally optimized for these use cases and not for general adoption.
+This project exists to support my personal workflows and learning goals. Design decisions, features and defaults are intentionally optimized for these use cases and not for general adoption.
 
 At this stage:
 - APIs, configuration formats and behavior may change without notice
@@ -13,7 +13,7 @@ At this stage:
 - Documentation may be incomplete or outdated
 - The project is **not** intended for mass usage or production environments
 
-Stability, extensibility, and broader usability may be considered in the future, but they are **not goals right now**.
+Stability, extensibility and broader usability may be considered in the future, but they are **not goals right now**.
 
 ## Testing
 ```bash
