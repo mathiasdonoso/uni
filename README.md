@@ -1,6 +1,6 @@
 # uni
 
-A personal cli tool to install packages across different Linux distributions
+A personal cli tool to install packages across different linux distributions
 
 ## Warning :warning:
 This project is a work in progress (WIP).

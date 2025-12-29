@@ -1,7 +1,7 @@
 [project]
 name = "uni"
 version = "0.1.0"
-description = "Add your description here"
+description = "A personal cli tool to install packages across different Linux distributions"
 readme = "README.md"
 requires-python = ">=3.14"
 dependencies = []
