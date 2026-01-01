@@ -24,3 +24,20 @@ apt update && apt install -y python3 ca-certificates
 cd /uni
 python3 -m uni.main nvim
 ```
+
+```bash
+# testing in almalinux
+docker run -it --rm -v $(pwd):/uni almalinux:9.7 bash
+
+cd /uni
+python3 -m uni.main nvim
+```
+
+```bash
+# testing in archlinux
+docker run -it --rm -v $(pwd):/uni archlinux/archlinux bash
+
+yes | sudo pacman -Sy python
+cd /uni
+python3 -m uni.main nvim
+```
