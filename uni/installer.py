@@ -6,7 +6,9 @@ import tarfile
 import tempfile
 from pathlib import Path
 from urllib.request import urlretrieve
+from uni.formula import Formula
 from uni.loader import load_formula
+from uni.source import Source
 
 
 OPT_BASE = Path("/opt/uni")
@@ -16,7 +18,7 @@ class Installer:
         self.install_dir = Path.home() / ".local" / "bin"
         self.install_dir.mkdir(parents=True, exist_ok=True)
     
-    def install(self, formula):
+    def install(self, formula: Formula):
         """Try each source until one succeeds"""
         sources = formula.sources()
         
@@ -36,14 +38,15 @@ class Installer:
                     print(f"Preparing to install using the package manager")
                     if self._install_package_manager(source):
                         print(f"Installed {formula.name} from the package manager")
-                        return True
+                        return formula.package_manager_post_install()
+
             except Exception as e:
                 print(f"Failed: {e}")
                 continue
         
         raise Exception(f"All installation methods failed for {formula.name}")
     
-    def _install_prebuilt_binary(self, source):
+    def _install_prebuilt_binary(self, source: Source):
         """Download binary from repository releases"""
         system = platform.system().lower()
         machine = platform.machine().lower()
@@ -102,11 +105,12 @@ class Installer:
 
         return True
     
-    def _install_package_manager(self, source):
+    def _install_package_manager(self, source: Source):
         """Use system package manager"""
         distro = self._detect_distro()
         packages = source.config.get("packages", {})
-        
+       
+        # TODO
         if distro not in packages:
             raise Exception(f"No package mapping for {distro}")
         
@@ -133,10 +137,10 @@ class Installer:
         
         if result.returncode != 0:
             raise Exception(f"Package manager failed: {result.stderr}")
-        
+
         return True
     
-    def _install_build_from_source(self, source):
+    def _install_build_from_source(self, source: Source):
         """Build from source"""
         for dep in source.config["build_deps"]:
             # TODO: Keep an eye on this

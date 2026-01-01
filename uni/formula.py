@@ -1,8 +1,6 @@
 class Formula:
     name = None
     description = None
-    homepage = None
-    license = None
     version = None
     
     def sources(self):
@@ -12,23 +10,17 @@ class Formula:
         """
         raise NotImplementedError("Subclass must implement sources()")
     
-    def test(self):
+    def test(self) -> bool:
         """
         Optional: Test that installation worked.
         Return True if test passes, False otherwise.
         """
         return True
+
+    def package_manager_post_install(self) -> bool:
+        """
+        Optional: post-installation steps only when installing via a package manager.
+        Return True if all steps complete successfully; otherwise, return False.
+        """
+        return True
     
-    def run_command(self, cmd):
-        """Helper to run shell commands"""
-        import subprocess
-        try:
-            result = subprocess.run(
-                cmd,
-                check=True,
-                capture_output=True,
-                text=True
-            )
-            return result.returncode == 0
-        except subprocess.CalledProcessError:
-            return False
