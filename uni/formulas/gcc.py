@@ -11,9 +11,11 @@ class GCC(Formula):
     def sources(self):
         return [
             Source.package_manager(
+                # TODO: separate gcc from group packages???
                 ubuntu="build-essential",
                 debian="build-essential",
-                arch="gcc",
+                arch="base-devel",
+                # TODO: what about fedora? should I handle groupinstall here?
                 fedora="gcc",
             ),
         ]
