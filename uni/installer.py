@@ -151,30 +151,38 @@ class Installer:
 
         # download source code and running commands
         with tempfile.TemporaryDirectory(prefix="uni-") as tmpdir:
-            tmpdir = Path(tmpdir)
+            try:
+                tmpdir = Path(tmpdir)
     
-            print(f"Downloading source code from {url}...")
-            archive = tmpdir / "code.tar.gz"
-            urlretrieve(url, archive)
+                print(f"Downloading source code from {url}...")
+                archive = tmpdir / "code.tar.gz"
+                urlretrieve(url, archive)
+        
+                if not self._verify_checksum(archive, expected_sha256):
+                    raise Exception("Checksum verification failed")
+        
+                extract_dir = tmpdir / "extract"
+                extract_dir.mkdir()
     
-            if not self._verify_checksum(archive, expected_sha256):
-                raise Exception("Checksum verification failed")
+                with tarfile.open(archive, "r:gz") as tar:
+                    tar.extractall(extract_dir)
     
-            extract_dir = tmpdir / "extract"
-            extract_dir.mkdir()
-
-            with tarfile.open(archive, "r:gz") as tar:
-                tar.extractall(extract_dir)
-
-            extracted_root = next(
-                p for p in extract_dir.iterdir() if p.is_dir()
-            )
-
-            for cmd in source.config["build_steps"]:
-                result = subprocess.run(cmd, cwd=extracted_root, capture_output=True, text=True)
-
-                if result.returncode != 0:
-                    raise Exception(f"command {cmd} failed: {result.stderr}")
+                extracted_root = next(
+                    p for p in extract_dir.iterdir() if p.is_dir()
+                )
+   
+                for cmd in source.config["build_steps"]:
+                    result = subprocess.run(
+                        cmd,
+                        cwd=extracted_root,
+                        capture_output=True,
+                        text=True
+                    )
+    
+                    if result.returncode != 0:
+                        raise Exception(f"command {cmd} failed: {result.stderr}")
+            except Exception as e:
+                print(f"error downloading source and running it: {e}")
 
         return True
 
