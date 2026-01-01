@@ -6,6 +6,7 @@ import tarfile
 import tempfile
 from pathlib import Path
 from urllib.request import urlretrieve
+from uni.loader import load_formula
 
 
 OPT_BASE = Path("/opt/uni")
@@ -59,7 +60,7 @@ class Installer:
         url = artifact["url"]
         expected_sha256 = artifact["sha256"]
         bin_path = artifact.get("bin", "")
-    
+
         with tempfile.TemporaryDirectory(prefix="uni-") as tmpdir:
             tmpdir = Path(tmpdir)
     
@@ -76,10 +77,16 @@ class Installer:
             with tarfile.open(archive, "r:gz") as tar:
                 tar.extractall(extract_dir)
 
-            extracted_root = next(
-                p for p in extract_dir.iterdir() if p.is_dir()
-            )
-    
+            entries = list(extract_dir.iterdir())
+            dirs = [p for p in entries if p.is_dir()]
+            files = [p for p in entries if p.is_file()]
+
+            extracted_root = None
+            if len(dirs) == 1 and not files:
+                extracted_root = dirs[0]
+            elif len(files) == 1 and not dirs:
+                extracted_root = files[0]
+
             binary_source = extracted_root / bin_path
             if not binary_source.exists():
                 raise Exception(f"Binary not found at {binary_source}")
@@ -131,10 +138,13 @@ class Installer:
     
     def _install_build_from_source(self, source):
         """Build from source"""
-        # download dependencies
         for dep in source.config["build_deps"]:
-            # TODO
-            pass
+            # TODO: Keep an eye on this
+            try:
+                dep_formula = load_formula(dep)
+                self.install(dep_formula)
+            except Exception as e:
+                print(f"Failed to dependency {dep}: {e}")
 
         url = source.config["url"]
         expected_sha256 = source.config["sha256"]

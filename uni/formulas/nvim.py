@@ -35,6 +35,6 @@ class Nvim(Formula):
             ),
         ]
     
-    def validate(self):
-        pass
+    def test(self):
+        return True
 
