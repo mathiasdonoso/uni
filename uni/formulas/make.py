@@ -6,7 +6,7 @@ class Make(Formula):
     name = "make"
     description = "Utility for directing compilation"
     version = "4.4.1"
-    bin = "tmux"
+    bin = "make"
 
     def sources(self):
         return [

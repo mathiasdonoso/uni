@@ -27,10 +27,17 @@ class Nvim(Formula):
             Source.build_from_source(
                 url="https://github.com/neovim/neovim/archive/refs/tags/v0.11.5.tar.gz",
                 sha256="c63450dfb42bb0115cd5e959f81c77989e1c8fd020d5e3f1e6d897154ce8b771",
-                build_deps=["make"],
+                build_deps=[
+                    "ninja",
+                    "gettext",
+                    "cmake",
+                    "curl",
+                    "gcc",
+                    "git"
+                ],
                 build_steps=[
-                    "make CMAKE_BUILD_TYPE=Release",
-                    "make install",
+                    ["make", "CMAKE_BUILD_TYPE=Release"],
+                    ["make", "install"],
                 ],
             ),
         ]
