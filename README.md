@@ -37,7 +37,7 @@ python3 -m uni.main nvim
 # testing in archlinux
 docker run -it --rm -v $(pwd):/uni archlinux/archlinux bash
 
-yes | sudo pacman -Sy python
+yes | pacman -Sy python
 cd /uni
 python3 -m uni.main nvim
 ```
