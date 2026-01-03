@@ -1,6 +1,5 @@
 import hashlib
 import os
-from os.path import isfile
 import stat
 import platform
 import subprocess
@@ -13,6 +12,7 @@ from uni.loader import load_formula
 from uni.source import Source
 
 
+# https://en.wikipedia.org/wiki/Executable_and_Linkable_Format#ELF_header
 ELF_MAGIC = b"\x7fELF"
 OPT_BASE = Path("/opt/uni")
 
