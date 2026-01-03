@@ -34,6 +34,15 @@ python3 -m uni.main nvim
 ```
 
 ```bash
+# testing in fedora
+docker run -it --rm -v $(pwd):/uni fedora:44 bash
+
+dnf install -y python3
+cd /uni
+python3 -m uni.main nvim
+```
+
+```bash
 # testing in archlinux
 docker run -it --rm -v $(pwd):/uni archlinux/archlinux bash
 
