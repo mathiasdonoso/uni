@@ -16,6 +16,7 @@ from uni.source import Source
 ELF_MAGIC = b"\x7fELF"
 OPT_BASE = Path("/opt/uni")
 
+# TODO: move these functions into a utils module?
 def is_intended_executable(path: str) -> bool:
     if not os.path.isfile(path):
         return False
