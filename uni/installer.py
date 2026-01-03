@@ -1,5 +1,7 @@
 import hashlib
 import os
+from os.path import isfile
+import stat
 import platform
 import subprocess
 import tarfile
@@ -11,7 +13,32 @@ from uni.loader import load_formula
 from uni.source import Source
 
 
+ELF_MAGIC = b"\x7fELF"
 OPT_BASE = Path("/opt/uni")
+
+def is_intended_executable(path: str) -> bool:
+    if not os.path.isfile(path):
+        return False
+
+    try:
+        with open(path, "rb") as f:
+            first4 = f.read(4)
+            if first4 == ELF_MAGIC:
+                return True
+
+            f.seek(0)
+            first_line = f.readline(128)
+            if first_line.startswith(b"#!"):
+                return True
+    except OSError:
+        return False
+
+    return False
+
+def make_executable(path: str) -> None:
+    st = os.stat(path)
+    os.chmod(path, st.st_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
+
 
 class Installer:
     def __init__(self):
@@ -73,27 +100,38 @@ class Installer:
     
             if not self._verify_checksum(archive, expected_sha256):
                 raise Exception("Checksum verification failed")
-    
+
             extract_dir = tmpdir / "extract"
             extract_dir.mkdir()
+            binary_source = Path()
 
-            with tarfile.open(archive, "r:gz") as tar:
-                tar.extractall(extract_dir)
+            if os.path.isfile(archive):
+                print(f"downloaded file is the binary")
+                # field `bin` must be defined in the source
+                # TODO: how do I make sure the field `bin` is not empty?
+                archive = archive.rename(Path(tmpdir) / bin_path)
 
-            entries = list(extract_dir.iterdir())
-            dirs = [p for p in entries if p.is_dir()]
-            files = [p for p in entries if p.is_file()]
+                if is_intended_executable(str(archive)):
+                    make_executable(str(archive))
+                    binary_source = archive
+            else:
+                with tarfile.open(archive, "r:gz") as tar:
+                    tar.extractall(extract_dir)
+    
+                entries = list(extract_dir.iterdir())
+                dirs = [p for p in entries if p.is_dir()]
+                files = [p for p in entries if p.is_file()]
+    
+                extracted_root = None
+                if len(dirs) == 1 and not files:
+                    extracted_root = dirs[0]
+                elif len(files) == 1 and not dirs:
+                    extracted_root = files[0]
+                binary_source = extracted_root / bin_path
 
-            extracted_root = None
-            if len(dirs) == 1 and not files:
-                extracted_root = dirs[0]
-            elif len(files) == 1 and not dirs:
-                extracted_root = files[0]
-
-            binary_source = extracted_root / bin_path
             if not binary_source.exists():
                 raise Exception(f"Binary not found at {binary_source}")
-    
+   
             binary_name = Path(bin_path).name
             binary_dest = self.install_dir / binary_name
     
@@ -104,7 +142,7 @@ class Installer:
             binary_dest.chmod(0o755)
 
         return True
-    
+
     def _install_package_manager(self, source: Source):
         """Use system package manager"""
         distro = self._detect_distro()
