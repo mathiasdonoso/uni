@@ -63,10 +63,10 @@ Usage:
     uni --help, -h                Show this help
 
 Examples:
-    uni neovim                    Install neovim
-    uni neovim tmux ripgrep       Install multiple packages
-    uni info neovim               Show neovim information
-    uni update neovim             Update neovim
+    uni nvim                    Install nvim
+    uni nvim tmux ripgrep       Install multiple packages
+    uni info nvim               Show nvim information
+    uni update nvim             Update nvim
 """)
 
 
