@@ -154,22 +154,25 @@ class Installer:
             raise Exception(f"No package mapping for {distro}")
         
         package_name = packages[distro]
+        packages = package_name.split(" ")
         
         is_root = os.geteuid() == 0
-        if distro in ["debian", "ubuntu"]:
-            cmd = ["apt", "install", "-y", package_name]
-            if not is_root:
-                cmd.insert(0, "sudo")
-        elif distro == "arch":
-            cmd = ["pacman", "-S", "--noconfirm", package_name]
-            if not is_root:
-                cmd.insert(0, "sudo")
-        elif distro in ["fedora", "rhel"]:
-            cmd = ["dnf", "install", "-y", package_name]
-            if not is_root:
-                cmd.insert(0, "sudo")
-        else:
-            raise Exception(f"Unsupported distro: {distro}")
+
+        DISTRO_CMDS = {
+            "debian": ["apt", "install", "-y"],
+            "ubuntu": ["apt", "install", "-y"],
+            "arch": ["pacman", "-S", "--noconfirm"],
+            "fedora": ["dnf", "install", "-y"],
+            "rhel": ["dnf", "install", "-y"],
+        }
+
+        if distro not in DISTRO_CMDS:
+            raise ValueError(f"Unsupported distro: {distro}")
+
+        cmd = DISTRO_CMDS[distro] + list(packages)
+
+        if not is_root:
+            cmd.insert(0, "sudo")
         
         print(f"Running: {' '.join(cmd)}")
         result = subprocess.run(cmd, capture_output=True, text=True)
@@ -207,7 +210,7 @@ class Installer:
                 extract_dir = tmpdir / "extract"
                 extract_dir.mkdir()
     
-                with tarfile.open(archive, "r:gz") as tar:
+                with tarfile.open(archive, "r:*") as tar:
                     tar.extractall(extract_dir)
     
                 extracted_root = next(
