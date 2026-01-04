@@ -175,7 +175,7 @@ class Installer:
             cmd.insert(0, "sudo")
         
         print(f"Running: {' '.join(cmd)}")
-        result = subprocess.run(cmd, capture_output=True, text=True)
+        result = subprocess.run(cmd, text=True)
         
         if result.returncode != 0:
             raise Exception(f"Package manager failed: {result.stderr}")
@@ -221,7 +221,6 @@ class Installer:
                     result = subprocess.run(
                         cmd,
                         cwd=extracted_root,
-                        capture_output=True,
                         text=True
                     )
     

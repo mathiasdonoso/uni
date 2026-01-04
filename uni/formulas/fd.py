@@ -50,7 +50,6 @@ class Fd(Formula):
 
             result = subprocess.run(
                 ["ln", "-sf", fdfind_path, str(target)],
-                capture_output=True,
                 text=True,
                 check=False,
             )
