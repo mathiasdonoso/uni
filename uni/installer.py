@@ -53,17 +53,17 @@ class Installer:
         for source in sources:
             try:
                 if source.type == "prebuilt_binary":
-                    print(f"Preparing to install from prebuilt binary")
+                    print("Preparing to install from prebuilt binary")
                     if self._install_prebuilt_binary(source):
                         print(f"Installed {formula.name} from prebuilt binary")
                         return True
                 elif source.type == "build_from_source":
-                    print(f"Preparing to install from source")
+                    print("Preparing to install from source")
                     if self._install_build_from_source(source):
                         print(f"Built and installed {formula.name} from source")
                         return True
                 elif source.type == "package_manager":
-                    print(f"Preparing to install using the package manager")
+                    print("Preparing to install using the package manager")
                     if self._install_package_manager(source):
                         print(f"Installed {formula.name} from the package manager")
                         return formula.package_manager_post_install()
@@ -107,7 +107,7 @@ class Installer:
             binary_source = Path()
 
             if os.path.isfile(archive):
-                print(f"downloaded file is the binary")
+                print("downloaded file is the binary")
                 # field `bin` must be defined in the source
                 # TODO: how do I make sure the field `bin` is not empty?
                 archive = archive.rename(Path(tmpdir) / bin_path)

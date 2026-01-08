@@ -41,7 +41,7 @@ def cmd_info(package):
         formula = load_formula(package)
         print(f"Name: {formula.name}")
         print(f"Description: {formula.description}")
-        print(f"\nAvailable sources:")
+        print("\nAvailable sources:")
         for i, source in enumerate(formula.sources(), 1):
             print(f"  {i}. {source.type}")
     except Exception as e:
