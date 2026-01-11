@@ -6,7 +6,7 @@ from uni.loader import load_formula
 def cmd_install(packages):
     """Install one or more packages"""
     installer = Installer()
-    
+
     for package in packages:
         print(f"\n==> Installing {package}...")
         try:
@@ -74,14 +74,14 @@ def main():
     if len(sys.argv) < 2:
         print_usage()
         sys.exit(1)
-    
+
     args = sys.argv[1:]
     command = args[0]
-    
+
     if command in ["--help", "-h", "help"]:
         print_usage()
         return
-    
+
     if command == "install":
         if len(args) < 2:
             print("Error: No packages specified")
